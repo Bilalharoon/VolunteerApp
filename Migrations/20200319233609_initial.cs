@@ -12,11 +12,10 @@ namespace ExampleAPI.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Username = table.Column<string>(nullable: true),
-                    Password = table.Column<string>(nullable: true),
+                    Username = table.Column<string>(nullable: false),
+                    Password = table.Column<string>(nullable: false),
                     Token = table.Column<string>(nullable: true),
-                    Role = table.Column<string>(nullable: true),
-                    EventModelId = table.Column<int>(nullable: true)
+                    Role = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -29,8 +28,8 @@ namespace ExampleAPI.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(nullable: true),
-                    CreatorId = table.Column<int>(nullable: true)
+                    Name = table.Column<string>(nullable: false),
+                    CreatorId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -40,39 +39,22 @@ namespace ExampleAPI.Migrations
                         column: x => x.CreatorId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_EventModel_CreatorId",
                 table: "EventModel",
                 column: "CreatorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_EventModelId",
-                table: "Users",
-                column: "EventModelId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Users_EventModel_EventModelId",
-                table: "Users",
-                column: "EventModelId",
-                principalTable: "EventModel",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_EventModel_Users_CreatorId",
-                table: "EventModel");
+            migrationBuilder.DropTable(
+                name: "EventModel");
 
             migrationBuilder.DropTable(
                 name: "Users");
-
-            migrationBuilder.DropTable(
-                name: "EventModel");
         }
     }
 }

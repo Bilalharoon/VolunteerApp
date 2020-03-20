@@ -52,9 +52,24 @@ namespace ExampleAPI.Controllers
             }
         }
 
+        [Route("GetByUser/{id}")]
+        [HttpGet]
+        public ActionResult<List<EventModel>> GetByUser(int id)
+        {
+            var result = _service.GetEventsByUser(id);
+
+            if (result != null)
+            {
+                return result;
+            }
+            else
+            {
+                return BadRequest(@"User does not exist or has no events ¯\_(ツ)_/¯");
+            }
+        }
         // POST: Event
         [HttpPost]
-        [Authorize(AuthenticationSchemes="OAuth",Roles="Organizer")]
+        [Authorize(AuthenticationSchemes="OAuth",Roles="Organizer, Admin")]
         public ActionResult Post([FromBody] EventModel value)
         {
             if (!ModelState.IsValid)

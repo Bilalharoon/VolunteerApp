@@ -1,4 +1,5 @@
 ﻿using ExampleAPI.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace ExampleAPI.Services
         EventModel CreateEvent(EventModel eventModel);
         EventModel GetEvent(int Id);
         List<EventModel> GetEvents();
+        List<EventModel> GetEventsByUser(int Id);
 
     }
 
@@ -20,6 +22,11 @@ namespace ExampleAPI.Services
         public EventService(ApplicationDbContext applicationDbContext)
         {
             _context = applicationDbContext;
+        }
+
+        public List<EventModel> GetEventsByUser(int id)
+        {
+            return _context.EventModel.Where(e => e.CreatorId == id).ToList();
         }
         public EventModel CreateEvent(EventModel eventModel)
         {

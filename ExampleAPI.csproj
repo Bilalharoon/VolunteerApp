@@ -13,6 +13,10 @@
     <Compile Remove="Migrations\20200316000944_Initial.Designer.cs" />
     <Compile Remove="Migrations\20200319185755_initial.cs" />
     <Compile Remove="Migrations\20200319185755_initial.Designer.cs" />
+    <Compile Remove="Migrations\20200319233127_fk.cs" />
+    <Compile Remove="Migrations\20200319233127_fk.Designer.cs" />
+    <Compile Remove="Migrations\20200320000041_idk.cs" />
+    <Compile Remove="Migrations\20200320000041_idk.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +31,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.1" />
