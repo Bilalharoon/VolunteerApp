@@ -34,10 +34,10 @@ namespace ExampleAPI
             
            
             services.AddControllers().AddNewtonsoftJson(
-                    options =>
-                    {
-                        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                    }
+                options =>
+                {
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                }
                 );
 
             services.AddSingleton(Configuration);
@@ -64,6 +64,16 @@ namespace ExampleAPI
                     };
             });
 
+            services.AddCors(
+                    options =>
+                    {
+                        options.AddPolicy("AllowAll", builder => {
+                            builder.AllowAnyOrigin()
+                                   .AllowAnyMethod()
+                                   .AllowAnyHeader();
+                            });
+                    }
+                );
             
         }
 
@@ -83,10 +93,14 @@ namespace ExampleAPI
 
             app.UseAuthentication();
 
+            app.UseCors("AllowAll");
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
+            
         }
     }
 }

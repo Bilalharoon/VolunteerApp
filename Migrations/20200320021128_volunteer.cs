@@ -2,7 +2,7 @@
 
 namespace ExampleAPI.Migrations
 {
-    public partial class initial : Migration
+    public partial class volunteer : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -42,14 +42,53 @@ namespace ExampleAPI.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Volunteer",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    UsersId = table.Column<int>(nullable: false),
+                    EventsId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Volunteer", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Volunteer_EventModel_EventsId",
+                        column: x => x.EventsId,
+                        principalTable: "EventModel",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Volunteer_Users_UsersId",
+                        column: x => x.UsersId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_EventModel_CreatorId",
                 table: "EventModel",
                 column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Volunteer_EventsId",
+                table: "Volunteer",
+                column: "EventsId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Volunteer_UsersId",
+                table: "Volunteer",
+                column: "UsersId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Volunteer");
+
             migrationBuilder.DropTable(
                 name: "EventModel");
 

@@ -19,6 +19,10 @@ namespace ExampleAPI.Services
         UserModel Register(UserModel user);
         UserModel Login(UserModel user);
         List<UserModel> GetUsers();
+        UserModel GetUserById(int id);
+        Volunteer VolunteerForEvent(int eventId, int userId);
+        List<EventModel> GetAttendingEvents(int userId);
+
     }
 
     public class UserService : IUserService
@@ -31,13 +35,15 @@ namespace ExampleAPI.Services
             _config = configuration;
             _context = applicationDbContext;
         }
+
         string GenerateToken(UserModel user)
         {
+            // store information about the user
             var claims = new[]
             {
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, user.Role)
-
+                new Claim(ClaimTypes.Role, user.Role),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
 
             };
 
@@ -61,6 +67,7 @@ namespace ExampleAPI.Services
                     signingCredentials: signingCredentials
                 );
 
+            // turn token into string
             var tokenJson = new JwtSecurityTokenHandler().WriteToken(token);
 
             return tokenJson;
@@ -68,17 +75,25 @@ namespace ExampleAPI.Services
 
         public UserModel Login( UserModel user)
         {
-            var verifiedUser = _context.Users.AsEnumerable().SingleOrDefault(x => x.Username == user.Username && VerifyHash(x.Password, user.Password));
+            // Get user with same username and password
+            var verifiedUser = _context.Users.AsEnumerable().SingleOrDefault(x => x.Username.ToUpper() == user.Username.ToUpper() && VerifyHash(x.Password, user.Password));
+            if(verifiedUser != null)
+            {
+                // authentication successful so generate jwt token
+                string token = GenerateToken(verifiedUser);
+                verifiedUser.Token = token;
+                _context.Update(verifiedUser);
+                _context.SaveChanges();
+                verifiedUser.Password = null;
+                return verifiedUser;
 
-            // authentication successful so generate jwt token
-            verifiedUser.Token = GenerateToken(verifiedUser);
+            }
+            else
+            {
+                return null;
+            }
 
-            _context.Users.Update(verifiedUser);
-            _context.SaveChanges();
-            // remove password before returning
-            verifiedUser.Password = null;
-
-            return verifiedUser;
+            
         }
 
         public UserModel Register(UserModel user)
@@ -87,12 +102,18 @@ namespace ExampleAPI.Services
 
             // Generate random salt
             byte[] salt = new byte[128 / 8];
+
+            // Populate salt
             using (var rng = RandomNumberGenerator.Create())
             {
+                
                 rng.GetBytes(salt);
             }
 
+            // Hash the password 
             user.Password = Hash(user.Password, salt);
+
+            // Save the user to the database
             _context.Add(user);
             _context.SaveChanges();
 
@@ -101,6 +122,8 @@ namespace ExampleAPI.Services
             return user;
         }
 
+        // Method to hash passwords
+        // fromat: hash:salt
         string Hash(string password, byte[] salt)
         {
             string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
@@ -112,6 +135,8 @@ namespace ExampleAPI.Services
             return hashed + ":" + Convert.ToBase64String(salt);
         }
 
+        // verify a password by hashing the password inputed by the user with the same salt
+        // and checking if they are the same
         bool VerifyHash(string hash, string plainText)
         {
             // seperate hash from salt
@@ -133,13 +158,62 @@ namespace ExampleAPI.Services
             return false;
         }
 
+        // Get all Users
         public List<UserModel> GetUsers()
         {
             var users = _context.Users.ToList();
 
+            // remove the passwords before sending
             users.ForEach(u => u.Password = null);
 
             return users;
         }
+
+        // Volunteer for an event.
+        public Volunteer VolunteerForEvent(int eventId, int UserId)
+        {
+            // get the users and events from the Id
+            UserModel user = _context.Users.FirstOrDefault(u => u.Id == UserId);
+            EventModel eventModel = _context.Events.FirstOrDefault(e => e.Id == eventId);
+
+            
+            // Create the volunteer object
+            Volunteer volunteer = new Volunteer { Users = user, Events = eventModel };
+
+            // save the volunteer
+            _context.Volunteer.Add(volunteer);
+
+           
+            _context.SaveChanges();
+
+            return volunteer;
+        }
+
+        public List<EventModel> GetAttendingEvents(int UserId)
+        {
+            var attendingEvents = new List<EventModel>(); 
+
+
+            _context.Volunteer
+                .Where(v => v.UsersId == UserId)
+                .Include(v => v.Events)
+                .ToList()
+                .ForEach(v => attendingEvents.Add(v.Events));
+
+            return attendingEvents;
+            
+        }
+
+        public UserModel GetUserById(int id)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Id == id);
+            user.Password = null;
+            user.Token = null;
+
+            return user;
+        }
+
+
+        
     }
 }

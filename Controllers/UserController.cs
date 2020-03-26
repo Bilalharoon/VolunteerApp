@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using ExampleAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
+using System.Security.Claims;
+using System;
 
 namespace ExampleAPI.Controllers
 {
@@ -20,9 +22,16 @@ namespace ExampleAPI.Controllers
 
         [Authorize(AuthenticationSchemes = "OAuth", Roles = "Admin")]
         [HttpGet]
-        public ActionResult<List<UserModel>> Get(){
+        public ActionResult<List<UserModel>> Get() {
 
             return Ok(_service.GetUsers());
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        public ActionResult<UserModel> Get(int id)
+        {
+            return Ok(_service.GetUserById(id));
         }
 
         [Route("Login")]
@@ -34,13 +43,17 @@ namespace ExampleAPI.Controllers
                 return BadRequest("User is Invalid");
             }
 
-            UserModel response = _service.Login(user);
-            if(response != null)
+            var verifiedUser = _service.Login(user);
+            if (verifiedUser != null)
             {
-                return Ok(response);
+                return Ok(new { 
+                    username = verifiedUser.Username,
+                    Events = verifiedUser.Events,
+                    access_token = verifiedUser.Token
+                });
             }
             return BadRequest("Incorrect Username or Password");
-            
+
         }
 
         [Route("Register")]
@@ -52,16 +65,54 @@ namespace ExampleAPI.Controllers
                 return BadRequest();
             }
 
-            // Generate random salt
+            
             UserModel response = _service.Register(user);
-            return Ok(user);
+            return Ok(response);
 
         }
 
+        [HttpGet]
+        [Authorize(AuthenticationSchemes = "OAuth")]
+        [Route("GetEvents")]
+        public ActionResult GetEvents()
+        {
+            var userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var result = _service.GetAttendingEvents(userId);
+
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest();
+            }
+
+        }
+
+        [Route("SignUpForEvent/{id}")]
+        [Authorize(Roles = "Volunteer", AuthenticationSchemes = "OAuth")]
+        [HttpGet]
+        public ActionResult SignUpForEvent(int id)
+        {
+            int userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            Volunteer vol = _service.VolunteerForEvent(id, userId);
+            
+            if(vol != null)
+            {
+                
+                return Ok(vol);
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
 
 
-        
-
-        
     }
 }
+  
+
+
+

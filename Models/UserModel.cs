@@ -23,8 +23,12 @@ namespace ExampleAPI.Models
 
         [Required]
         public string Password { get; set; }
-        public string Token { get; set; }
         public string Role { get; set; } = Roles.Volunteer;
-        public List<EventModel> Events { get; set; }
+        public string Token { get; set; }
+
+        public List<EventModel> CreatedEvents { get; set; }
+
+        public List<Volunteer> Events { get; set; }
+
     }
 }

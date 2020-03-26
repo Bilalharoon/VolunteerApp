@@ -13,6 +13,7 @@ namespace ExampleAPI.Models
         IConfiguration _config;
         public DbSet<UserModel> Users { get; set; }
         public DbSet<EventModel> Events { get; set; }
+        public DbSet<Volunteer> Volunteer { get; set; }
 
         public ApplicationDbContext(DbContextOptions options, IConfiguration config):base(options)
         {

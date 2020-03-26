@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using ExampleAPI.Models;
 using ExampleAPI.Services;
@@ -72,6 +73,7 @@ namespace ExampleAPI.Controllers
         [Authorize(AuthenticationSchemes="OAuth",Roles="Organizer, Admin")]
         public ActionResult Post([FromBody] EventModel value)
         {
+            value.CreatorId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             if (!ModelState.IsValid)
             {
                 return BadRequest("Invalid Event");
@@ -80,6 +82,8 @@ namespace ExampleAPI.Controllers
             return CreatedAtAction(nameof(Get), new { Id = value.Id }, value);
         }
 
+       
+       
         // PUT: api/Event/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] string value)

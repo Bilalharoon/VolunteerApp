@@ -8,16 +8,18 @@ using System.Threading.Tasks;
 
 namespace ExampleAPI.Models
 {
+    // represents an event
     public class EventModel
     {
         public int Id { get; set; }
-
         [Required]
         public string Name { get; set; }
 
-
+        // Foreign key that points to the UserModel that created this event
         public int CreatorId { get; set; }
         public UserModel Creator { get; set; }
+
+        public List<Volunteer> Volunteers { get; set; }
 
 
     }

@@ -5,6 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="client-app\**" />
+    <Content Remove="client-app\**" />
+    <EmbeddedResource Remove="client-app\**" />
+    <None Remove="client-app\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Migrations\20200316000322_Initial.cs" />
     <Compile Remove="Migrations\20200316000322_Initial.Designer.cs" />
     <Compile Remove="Migrations\20200316000748_Initial.cs" />
@@ -20,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove=".gitignore" />
     <None Remove="App.db" />
   </ItemGroup>
 

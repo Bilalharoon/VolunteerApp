@@ -60,11 +60,47 @@ namespace ExampleAPI.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("ExampleAPI.Models.Volunteer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("EventsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventsId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("Volunteer");
+                });
+
             modelBuilder.Entity("ExampleAPI.Models.EventModel", b =>
                 {
                     b.HasOne("ExampleAPI.Models.UserModel", "Creator")
-                        .WithMany("Events")
+                        .WithMany("CreatedEvents")
                         .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ExampleAPI.Models.Volunteer", b =>
+                {
+                    b.HasOne("ExampleAPI.Models.EventModel", "Events")
+                        .WithMany("Volunteers")
+                        .HasForeignKey("EventsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ExampleAPI.Models.UserModel", "Users")
+                        .WithMany("Events")
+                        .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

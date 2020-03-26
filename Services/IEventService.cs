@@ -14,8 +14,11 @@ namespace ExampleAPI.Services
         List<EventModel> GetEvents();
         List<EventModel> GetEventsByUser(int Id);
 
+        
+
     }
 
+    // normal CRUD
     public class EventService : IEventService
     {
         ApplicationDbContext _context;
@@ -28,6 +31,8 @@ namespace ExampleAPI.Services
         {
             return _context.EventModel.Where(e => e.CreatorId == id).ToList();
         }
+
+
         public EventModel CreateEvent(EventModel eventModel)
         {
             _context.Events.Add(eventModel);
@@ -46,5 +51,7 @@ namespace ExampleAPI.Services
             return _context.Events.ToList();
             
         }
+
+
     }
 }
