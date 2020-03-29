@@ -18,17 +18,15 @@ namespace ExampleAPI.Models
     {
         public int Id { get; set; }
 
-        [Required]
         public string Username { get; set; }
 
-        [Required]
         public string Password { get; set; }
         public string Role { get; set; } = Roles.Volunteer;
         public string Token { get; set; }
 
         public List<EventModel> CreatedEvents { get; set; }
 
-        public List<Volunteer> Events { get; set; }
+        public List<UserEvent> Events { get; set; }
 
     }
 }

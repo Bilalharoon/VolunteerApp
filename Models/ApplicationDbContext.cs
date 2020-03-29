@@ -13,7 +13,7 @@ namespace ExampleAPI.Models
         IConfiguration _config;
         public DbSet<UserModel> Users { get; set; }
         public DbSet<EventModel> Events { get; set; }
-        public DbSet<Volunteer> Volunteer { get; set; }
+        public DbSet<UserEvent> UserEvents { get; set; }
 
         public ApplicationDbContext(DbContextOptions options, IConfiguration config):base(options)
         {
@@ -24,10 +24,28 @@ namespace ExampleAPI.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite(_config.GetConnectionString("Default"));
+            optionsBuilder.UseSqlServer(_config.GetConnectionString("Default"));
         }
         
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<UserEvent>()
+                .HasKey(ue => new { ue.UsersId, ue.EventsId });
 
-        public DbSet<ExampleAPI.Models.EventModel> EventModel { get; set; }
+            modelBuilder.Entity<UserEvent>()
+                .HasOne(ue => ue.Users)
+                .WithMany(u => u.Events)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasForeignKey(ue => ue.UsersId);
+                
+
+            modelBuilder.Entity<UserEvent>()
+                .HasOne(ue => ue.Events)
+                .WithMany(e => e.Volunteers)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasForeignKey(ue => ue.EventsId);
+        }
+
+        
     }
 }

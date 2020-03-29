@@ -38,6 +38,7 @@ namespace ExampleAPI.Controllers
         [HttpPost]
         public IActionResult Login(UserModel user)
         {
+            
             if (!ModelState.IsValid)
             {
                 return BadRequest("User is Invalid");
@@ -48,8 +49,8 @@ namespace ExampleAPI.Controllers
             {
                 return Ok(new { 
                     username = verifiedUser.Username,
-                    Events = verifiedUser.Events,
-                    access_token = verifiedUser.Token
+                    access_token = verifiedUser.Token,
+                    Events=_service.GetAttendingEvents(verifiedUser.Id) 
                 });
             }
             return BadRequest("Incorrect Username or Password");
@@ -96,7 +97,7 @@ namespace ExampleAPI.Controllers
         public ActionResult SignUpForEvent(int id)
         {
             int userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            Volunteer vol = _service.VolunteerForEvent(id, userId);
+            UserEvent vol = _service.VolunteerForEvent(id, userId);
             
             if(vol != null)
             {

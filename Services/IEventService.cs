@@ -29,7 +29,7 @@ namespace ExampleAPI.Services
 
         public List<EventModel> GetEventsByUser(int id)
         {
-            return _context.EventModel.Where(e => e.CreatorId == id).ToList();
+            return _context.Events.Where(e => e.CreatorId == id).ToList();
         }
 
 
@@ -48,7 +48,7 @@ namespace ExampleAPI.Services
 
         public List<EventModel> GetEvents()
         {
-            return _context.Events.ToList();
+            return _context.Events.Include(e => e.Volunteers).ToList();
             
         }
 

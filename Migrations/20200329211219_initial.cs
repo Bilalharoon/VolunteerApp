@@ -2,7 +2,7 @@
 
 namespace ExampleAPI.Migrations
 {
-    public partial class volunteer : Migration
+    public partial class initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -11,11 +11,11 @@ namespace ExampleAPI.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Username = table.Column<string>(nullable: false),
-                    Password = table.Column<string>(nullable: false),
-                    Token = table.Column<string>(nullable: true),
-                    Role = table.Column<string>(nullable: true)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Username = table.Column<string>(nullable: true),
+                    Password = table.Column<string>(nullable: true),
+                    Role = table.Column<string>(nullable: true),
+                    Token = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -23,19 +23,19 @@ namespace ExampleAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "EventModel",
+                name: "Events",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(nullable: false),
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(nullable: true),
                     CreatorId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EventModel", x => x.Id);
+                    table.PrimaryKey("PK_Events", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_EventModel_Users_CreatorId",
+                        name: "FK_Events_Users_CreatorId",
                         column: x => x.CreatorId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -43,54 +43,46 @@ namespace ExampleAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Volunteer",
+                name: "UserEvents",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
                     UsersId = table.Column<int>(nullable: false),
-                    EventsId = table.Column<int>(nullable: false)
+                    EventsId = table.Column<int>(nullable: false),
+                    Id = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Volunteer", x => x.Id);
+                    table.PrimaryKey("PK_UserEvents", x => new { x.UsersId, x.EventsId });
                     table.ForeignKey(
-                        name: "FK_Volunteer_EventModel_EventsId",
+                        name: "FK_UserEvents_Events_EventsId",
                         column: x => x.EventsId,
-                        principalTable: "EventModel",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "Events",
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Volunteer_Users_UsersId",
+                        name: "FK_UserEvents_Users_UsersId",
                         column: x => x.UsersId,
                         principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_EventModel_CreatorId",
-                table: "EventModel",
+                name: "IX_Events_CreatorId",
+                table: "Events",
                 column: "CreatorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Volunteer_EventsId",
-                table: "Volunteer",
+                name: "IX_UserEvents_EventsId",
+                table: "UserEvents",
                 column: "EventsId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Volunteer_UsersId",
-                table: "Volunteer",
-                column: "UsersId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Volunteer");
+                name: "UserEvents");
 
             migrationBuilder.DropTable(
-                name: "EventModel");
+                name: "Events");
 
             migrationBuilder.DropTable(
                 name: "Users");

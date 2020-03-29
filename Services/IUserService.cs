@@ -20,7 +20,7 @@ namespace ExampleAPI.Services
         UserModel Login(UserModel user);
         List<UserModel> GetUsers();
         UserModel GetUserById(int id);
-        Volunteer VolunteerForEvent(int eventId, int userId);
+        UserEvent VolunteerForEvent(int eventId, int userId);
         List<EventModel> GetAttendingEvents(int userId);
 
     }
@@ -77,6 +77,7 @@ namespace ExampleAPI.Services
         {
             // Get user with same username and password
             var verifiedUser = _context.Users.AsEnumerable().SingleOrDefault(x => x.Username.ToUpper() == user.Username.ToUpper() && VerifyHash(x.Password, user.Password));
+
             if(verifiedUser != null)
             {
                 // authentication successful so generate jwt token
@@ -85,6 +86,8 @@ namespace ExampleAPI.Services
                 _context.Update(verifiedUser);
                 _context.SaveChanges();
                 verifiedUser.Password = null;
+                
+                
                 return verifiedUser;
 
             }
@@ -170,7 +173,7 @@ namespace ExampleAPI.Services
         }
 
         // Volunteer for an event.
-        public Volunteer VolunteerForEvent(int eventId, int UserId)
+        public UserEvent VolunteerForEvent(int eventId, int UserId)
         {
             // get the users and events from the Id
             UserModel user = _context.Users.FirstOrDefault(u => u.Id == UserId);
@@ -178,10 +181,10 @@ namespace ExampleAPI.Services
 
             
             // Create the volunteer object
-            Volunteer volunteer = new Volunteer { Users = user, Events = eventModel };
+            UserEvent volunteer = new UserEvent { Users = user, Events = eventModel };
 
             // save the volunteer
-            _context.Volunteer.Add(volunteer);
+            _context.UserEvents.Add(volunteer);
 
            
             _context.SaveChanges();
@@ -194,7 +197,7 @@ namespace ExampleAPI.Services
             var attendingEvents = new List<EventModel>(); 
 
 
-            _context.Volunteer
+            _context.UserEvents
                 .Where(v => v.UsersId == UserId)
                 .Include(v => v.Events)
                 .ToList()

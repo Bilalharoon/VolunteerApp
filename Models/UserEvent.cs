@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace ExampleAPI.Models
 {
-    public class Volunteer
+    public class UserEvent
     {
         public int Id { get; set; }
 
