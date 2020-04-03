@@ -83,8 +83,6 @@ namespace ExampleAPI.Services
                 // authentication successful so generate jwt token
                 string token = GenerateToken(verifiedUser);
                 verifiedUser.Token = token;
-                _context.Update(verifiedUser);
-                _context.SaveChanges();
                 verifiedUser.Password = null;
                 
                 
@@ -101,8 +99,12 @@ namespace ExampleAPI.Services
 
         public UserModel Register(UserModel user)
         {
-            
-
+            //check that username is not already taken
+            var checkUser = _context.Users.SingleOrDefault(u => u.Username == user.Username);
+            if (checkUser != null)
+            {
+                return null;
+            }
             // Generate random salt
             byte[] salt = new byte[128 / 8];
 
@@ -120,6 +122,8 @@ namespace ExampleAPI.Services
             _context.Add(user);
             _context.SaveChanges();
 
+            //create a token
+            user.Token = GenerateToken(user);
             // remove password before returning
             user.Password = null;
             return user;

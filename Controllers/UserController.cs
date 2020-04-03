@@ -47,11 +47,7 @@ namespace ExampleAPI.Controllers
             var verifiedUser = _service.Login(user);
             if (verifiedUser != null)
             {
-                return Ok(new { 
-                    username = verifiedUser.Username,
-                    access_token = verifiedUser.Token,
-                    Events=_service.GetAttendingEvents(verifiedUser.Id) 
-                });
+                return Ok(verifiedUser);
             }
             return BadRequest("Incorrect Username or Password");
 
@@ -68,6 +64,10 @@ namespace ExampleAPI.Controllers
 
             
             UserModel response = _service.Register(user);
+            if (response == null)
+            {
+                return BadRequest("Username is already taken");
+            }
             return Ok(response);
 
         }
