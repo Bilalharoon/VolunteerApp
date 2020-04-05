@@ -45,15 +45,7 @@ namespace ExampleAPI.Services
         {
 
             var response = _context.Events
-                .Include(e => e.Creator)
                 .SingleOrDefault(e => e.Id == Id);
-
-            var usersEvents = _context.UserEvents.Where(ue => ue.EventsId == response.Id);
-            response.Users = new List<UserModel>();
-            foreach (var ue in usersEvents.Include(ue => ue.Users))
-            {
-                response.Users.Add(ue.Users);
-            }
 
             return response;
 

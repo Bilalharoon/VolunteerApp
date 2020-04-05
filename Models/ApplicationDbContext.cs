@@ -24,7 +24,7 @@ namespace ExampleAPI.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(_config.GetConnectionString("Default"));
+            optionsBuilder.UseLazyLoadingProxies().UseSqlServer(_config.GetConnectionString("Default"));
         }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)

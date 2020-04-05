@@ -32,7 +32,7 @@ namespace ExampleAPI.Models
 
         
         [JsonIgnore]
-        public List<UserEvent> Events { get; set; }
+        public virtual List<UserEvent> Events { get; set; }
 
     }
 }

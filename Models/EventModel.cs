@@ -12,18 +12,19 @@ namespace ExampleAPI.Models
     // represents an event
     public class EventModel
     {
+
         public int Id { get; set; }
         public string Name { get; set; }
 
         // Foreign key that points to the UserModel that created this event
         public int CreatorId { get; set; }
-        public UserModel Creator { get; set; }
+        public virtual UserModel Creator { get; set; }
 
         [JsonIgnore]
-        public List<UserEvent> Volunteers { get; set; }
+        public virtual List<UserEvent> Volunteers { get; set; } = new List<UserEvent>();
 
         [NotMapped]
-        public List<UserModel> Users { get; set; }
+        public List<UserModel> Users => Volunteers.Select(v => v.Users).ToList();
 
 
     }
