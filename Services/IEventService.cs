@@ -43,12 +43,31 @@ namespace ExampleAPI.Services
 
         public EventModel GetEvent(int Id)
         {
-            return _context.Events.Include(e => e.Volunteers).Include(e => e.Creator).FirstOrDefault(e => e.Id == Id);
+
+            var response = _context.Events
+                .Include(e => e.Creator)
+                .SingleOrDefault(e => e.Id == Id);
+
+            var usersEvents = _context.UserEvents.Where(ue => ue.EventsId == response.Id);
+            response.Users = new List<UserModel>();
+            foreach (var ue in usersEvents.Include(ue => ue.Users))
+            {
+                response.Users.Add(ue.Users);
+            }
+
+            return response;
+
+
+
+
         }
 
         public List<EventModel> GetEvents()
         {
-            return _context.Events.Include(e => e.Volunteers).Include(e => e.Creator).ToList();
+            return _context.Events
+                .Include(e => e.Volunteers)
+                .Include(e => e.Creator)
+                .ToList();
             
         }
 

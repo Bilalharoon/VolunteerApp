@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -18,7 +19,11 @@ namespace ExampleAPI.Models
         public int CreatorId { get; set; }
         public UserModel Creator { get; set; }
 
+        [JsonIgnore]
         public List<UserEvent> Volunteers { get; set; }
+
+        [NotMapped]
+        public List<UserModel> Users { get; set; }
 
 
     }

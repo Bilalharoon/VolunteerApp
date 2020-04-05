@@ -14,5 +14,7 @@ namespace ExampleAPI.Models
 
         public EventModel Events { get; set; }
         public int EventsId { get; set; }   // Foreign key that points to event
+
+        
     }
 }
