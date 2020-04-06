@@ -57,8 +57,6 @@ namespace ExampleAPI.Services
         public List<EventModel> GetEvents()
         {
             return _context.Events
-                .Include(e => e.Volunteers)
-                .Include(e => e.Creator)
                 .ToList();
             
         }

@@ -72,24 +72,7 @@ namespace ExampleAPI.Controllers
 
         }
 
-        [HttpGet]
-        [Authorize(AuthenticationSchemes = "OAuth")]
-        [Route("GetEvents")]
-        public ActionResult GetEvents()
-        {
-            var userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var result = _service.GetAttendingEvents(userId);
 
-            if (result != null)
-            {
-                return Ok(result);
-            }
-            else
-            {
-                return BadRequest();
-            }
-
-        }
 
         [Route("SignUpForEvent/{id}")]
         [Authorize(Roles = "Volunteer", AuthenticationSchemes = "OAuth")]

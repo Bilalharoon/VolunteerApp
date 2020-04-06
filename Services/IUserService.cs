@@ -21,7 +21,6 @@ namespace ExampleAPI.Services
         List<UserModel> GetUsers();
         UserModel GetUserById(int id);
         UserEvent VolunteerForEvent(int eventId, int userId);
-        List<EventModel> GetAttendingEvents(int userId);
 
     }
 
@@ -196,20 +195,7 @@ namespace ExampleAPI.Services
             return volunteer;
         }
 
-        public List<EventModel> GetAttendingEvents(int UserId)
-        {
-            var attendingEvents = new List<EventModel>(); 
 
-
-            _context.UserEvents
-                .Where(v => v.UsersId == UserId)
-                .Include(v => v.Events)
-                .ToList()
-                .ForEach(v => attendingEvents.Add(v.Events));
-
-            return attendingEvents;
-            
-        }
 
         public UserModel GetUserById(int id)
         {
