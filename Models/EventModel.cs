@@ -18,7 +18,9 @@ namespace ExampleAPI.Models
 
         // Foreign key that points to the UserModel that created this event
         public int CreatorId { get; set; }
-        public virtual UserModel Creator { get; set; }
+
+        private UserModel _creator;
+        public virtual UserModel Creator { get { _creator.Password = null; return _creator; } set { this._creator = value; } }
 
         [JsonIgnore]
         public virtual List<UserEvent> Volunteers { get; set; } = new List<UserEvent>();
