@@ -22,8 +22,8 @@ namespace ExampleAPI.Models
 
         public string Username { get; set; }
 
-        [JsonIgnore]
         public string Password { get; set; }
+
         public string Role { get; set; } = Roles.Volunteer;
 
         [NotMapped]
