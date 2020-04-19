@@ -1,26 +1,18 @@
 using System;
-using System.Buffers;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using ExampleAPI.Helpers;
 using ExampleAPI.Models;
 using ExampleAPI.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 
 namespace ExampleAPI
 {
@@ -38,9 +30,12 @@ namespace ExampleAPI
         {
             
            
-            services.AddControllers().AddNewtonsoftJson(
+            services.AddControllers(
+                options => { options.Filters.Add(new HttpResponseExceptionFilter()); }
+                ).AddNewtonsoftJson(
                 options =>
-                {
+                { 
+                    
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                     //options.SerializerSettings.ContractResolver = new UserContractResolver();
                     options.SerializerSettings.Converters.Add(new UserConverter());
@@ -67,6 +62,7 @@ namespace ExampleAPI
                         ValidIssuer = "localhost",
                         ValidAudience = "localhost",
                         IssuerSigningKey = key,
+                        
 
                     };
             });
@@ -119,11 +115,7 @@ namespace ExampleAPI
         public override bool CanConvert(Type objectType)
         {
             // we can only convert users and lists of users
-            if (objectType == typeof(UserModel)|| objectType == typeof(List<UserModel>))
-            {
-                return true;
-            }
-            return false;
+            return objectType == typeof(UserModel)|| objectType == typeof(List<UserModel>);
         }
 
         // cannot deserialize json
@@ -131,28 +123,25 @@ namespace ExampleAPI
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            if (value is UserModel)
+            if (value is UserModel user)
             {
-                // convert and set password to null
-                var user = (UserModel)value;
-                
+
                 user.Password = null;
 
                 serializer.Serialize(writer, user);
             }
 
-            if (value is List<UserModel>)
+            if (value is List<UserModel> users)
             {
 
-                List<UserModel> users = (List<UserModel>)value;
                 
                 // start writing array
                 writer.WriteStartArray();
 
-                foreach(var user in users)
+                foreach(var u in users)
                 {
-                    user.Password = null;   // set password to null
-                    serializer.Serialize(writer, user); //serialize into json
+                    u.Password = null;   // set password to null
+                    serializer.Serialize(writer, u); //serialize into json
                 }
 
                 writer.WriteEndArray();
@@ -169,4 +158,28 @@ namespace ExampleAPI
             throw new NotImplementedException();
         }
     }
+
+    class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
+    {
+        public void OnActionExecuted(ActionExecutedContext context)
+        {
+            if (context.Exception is HttpResponseException exception)
+            {
+                context.Result = new ObjectResult(exception.Value)
+                {
+                    StatusCode = exception.Status,
+                    
+                };
+                context.ExceptionHandled = true;
+            }
+        }
+
+        public void OnActionExecuting(ActionExecutingContext context)
+        {
+            
+        }
+
+        public int Order { get; } = 1000;
+    }
+    
 }

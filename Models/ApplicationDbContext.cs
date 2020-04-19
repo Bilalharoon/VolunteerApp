@@ -34,7 +34,7 @@ namespace ExampleAPI.Models
 
             modelBuilder.Entity<UserEvent>()
                 .HasOne(ue => ue.Users)
-                .WithMany(u => u.Events)
+                .WithMany(u => u.UserEvents)
                 .OnDelete(DeleteBehavior.NoAction)
                 .HasForeignKey(ue => ue.UsersId);
                 

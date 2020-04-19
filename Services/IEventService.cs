@@ -21,7 +21,7 @@ namespace ExampleAPI.Services
     // normal CRUD
     public class EventService : IEventService
     {
-        ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
         public EventService(ApplicationDbContext applicationDbContext)
         {
             _context = applicationDbContext;
@@ -49,16 +49,12 @@ namespace ExampleAPI.Services
 
             return response;
 
-
-
-
         }
 
         public List<EventModel> GetEvents()
         {
             return _context.Events
                 .ToList();
-            
         }
 
 

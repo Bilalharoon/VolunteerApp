@@ -44,15 +44,27 @@ namespace ExampleAPI.Controllers
                 return BadRequest("User is Invalid");
             }
 
-            var verifiedUser = _service.Login(user);
-            if (verifiedUser != null)
-            {
+            //try
+            //{
+                var verifiedUser = _service.Login(user);
                 return Ok(verifiedUser);
-            }
-            return BadRequest("Incorrect Username or Password");
+            //}
+            //catch (Exception e)
+            //{
+            //    return BadRequest(e.Message);
+            //}
+            
+            
+            
 
         }
 
+        //[Route("token")]
+        //[HttpPost]
+        //public IActionResult Token(UserModel user)
+        //{
+        //    _service.GenerateAccessToken(user);
+        //}
         [Route("Register")]
         [HttpPost]
         public IActionResult Register(UserModel user)
@@ -79,7 +91,7 @@ namespace ExampleAPI.Controllers
         [HttpGet]
         public ActionResult SignUpForEvent(int id)
         {
-            int userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
             UserEvent vol = _service.VolunteerForEvent(id, userId);
             
             if(vol != null)

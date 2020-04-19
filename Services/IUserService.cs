@@ -11,6 +11,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using ExampleAPI.Helpers;
 
 namespace ExampleAPI.Services
 {
@@ -21,7 +22,7 @@ namespace ExampleAPI.Services
         List<UserModel> GetUsers();
         UserModel GetUserById(int id);
         UserEvent VolunteerForEvent(int eventId, int userId);
-
+        string GenerateAccessToken(UserModel user);
     }
 
     public class UserService : IUserService
@@ -35,7 +36,7 @@ namespace ExampleAPI.Services
             _context = applicationDbContext;
         }
 
-        string GenerateToken(UserModel user)
+        private string GenerateToken(UserModel user, int days)
         {
             // store information about the user
             var claims = new[]
@@ -62,7 +63,7 @@ namespace ExampleAPI.Services
                     audience: "localhost",
                     claims: claims,
                     notBefore: DateTime.Now,
-                    expires: DateTime.Now.AddHours(3),
+                    expires: DateTime.Now.AddDays(days),
                     signingCredentials: signingCredentials
                 );
 
@@ -72,37 +73,37 @@ namespace ExampleAPI.Services
             return tokenJson;
         }
 
-        public UserModel Login( UserModel user)
+        public UserModel Login(UserModel user)
         {
             // Get user with same username and password
             var verifiedUser = _context.Users.AsEnumerable().SingleOrDefault(x => x.Username.ToUpper() == user.Username.ToUpper() && VerifyHash(x.Password, user.Password));
 
-            if(verifiedUser != null)
+            if (verifiedUser == null)
             {
-                // authentication successful so generate jwt token
-                string token = GenerateToken(verifiedUser);
-                verifiedUser.Token = token;
-                verifiedUser.Password = null;
-                
-                
-                return verifiedUser;
-
-            }
-            else
-            {
-                return null;
+                throw new HttpResponseException("Username or Password is incorrect");
             }
 
+            if (user.AccessToken != verifiedUser.AccessToken)
+            {
+                throw new HttpResponseException("Access Token is incorrect");
+            }
             
+            // authentication successful so generate jwt token
+            string token = GenerateToken(verifiedUser, 7);
+            verifiedUser.Token = token;
+            verifiedUser.Password = null;
+            return verifiedUser;
+            
+
         }
 
         public UserModel Register(UserModel user)
         {
             //check that username is not already taken
-            var checkUser = _context.Users.SingleOrDefault(u => u.Username == user.Username);
+            var checkUser = _context.Users.SingleOrDefault(u => u.Username.ToUpper() == user.Username.ToUpper());
             if (checkUser != null)
             {
-                return null;
+                throw new HttpResponseException("Username is taken");
             }
             // Generate random salt
             byte[] salt = new byte[128 / 8];
@@ -116,21 +117,21 @@ namespace ExampleAPI.Services
 
             // Hash the password 
             user.Password = Hash(user.Password, salt);
-
+            user.AccessToken = GenerateAccessToken(user);
             // Save the user to the database
             _context.Add(user);
             _context.SaveChanges();
 
             //create a token
-            user.Token = GenerateToken(user);
+            user.Token = GenerateToken(user, 7);
             // remove password before returning
             user.Password = null;
             return user;
         }
 
         // Method to hash passwords
-        // fromat: hash:salt
-        string Hash(string password, byte[] salt)
+        // format: hash:salt
+        private string Hash(string password, byte[] salt)
         {
             string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
               password: password,
@@ -143,7 +144,7 @@ namespace ExampleAPI.Services
 
         // verify a password by hashing the password inputed by the user with the same salt
         // and checking if they are the same
-        bool VerifyHash(string hash, string plainText)
+        private bool VerifyHash(string hash, string plainText)
         {
             // seperate hash from salt
             string[] SplithashedPass = hash.Split(":");
@@ -156,12 +157,7 @@ namespace ExampleAPI.Services
             string userPassHash = Hash(plainText, salt);
 
             // check if the passwords match
-            if (hash == userPassHash)
-            {
-                return true;
-            }
-
-            return false;
+            return hash == userPassHash;
         }
 
         // Get all Users
@@ -206,7 +202,15 @@ namespace ExampleAPI.Services
             return user;
         }
 
+        public string GenerateAccessToken(UserModel user)
+        {
+            var token = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(token);
+            return Convert.ToBase64String(token);
 
-        
+
+        }
+
     }
 }

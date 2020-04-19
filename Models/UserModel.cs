@@ -25,14 +25,21 @@ namespace ExampleAPI.Models
         public string Password { get; set; }
 
         public string Role { get; set; } = Roles.Volunteer;
+        
+        /// <summary>
+        /// The long-term token that is used to refresh other tokens 
+        /// </summary>
+        public string AccessToken { get; set; }
+
 
         [NotMapped]
-        [JsonIgnore]
         public string Token { get; set; }
 
-        
         [JsonIgnore]
-        public virtual List<UserEvent> Events { get; set; }
+        public virtual List<UserEvent> UserEvents { get; set; }
+
+        [NotMapped]
+        public List<EventModel> Events => UserEvents.Select(userEvent => userEvent.Events).ToList();
 
     }
 }
