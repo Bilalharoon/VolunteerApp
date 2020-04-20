@@ -22,7 +22,7 @@ namespace ExampleAPI.Services
         List<UserModel> GetUsers();
         UserModel GetUserById(int id);
         UserEvent VolunteerForEvent(int eventId, int userId);
-        string GenerateAccessToken(UserModel user);
+        
     }
 
     public class UserService : IUserService
@@ -36,7 +36,7 @@ namespace ExampleAPI.Services
             _context = applicationDbContext;
         }
 
-        private string GenerateToken(UserModel user, int days)
+        private string GenerateToken(UserModel user)
         {
             // store information about the user
             var claims = new[]
@@ -63,7 +63,7 @@ namespace ExampleAPI.Services
                     audience: "localhost",
                     claims: claims,
                     notBefore: DateTime.Now,
-                    expires: DateTime.Now.AddDays(days),
+                    expires: DateTime.Now.AddDays(7),
                     signingCredentials: signingCredentials
                 );
 
@@ -83,13 +83,13 @@ namespace ExampleAPI.Services
                 throw new HttpResponseException("Username or Password is incorrect");
             }
 
-            if (user.AccessToken != verifiedUser.AccessToken)
+            if (user.RefreshToken != verifiedUser.RefreshToken)
             {
-                throw new HttpResponseException("Access Token is incorrect");
+                throw new HttpResponseException("Refresh Token is incorrect");
             }
-            
+
             // authentication successful so generate jwt token
-            string token = GenerateToken(verifiedUser, 7);
+            string token = GenerateToken(verifiedUser);
             verifiedUser.Token = token;
             verifiedUser.Password = null;
             return verifiedUser;
@@ -117,15 +117,16 @@ namespace ExampleAPI.Services
 
             // Hash the password 
             user.Password = Hash(user.Password, salt);
-            user.AccessToken = GenerateAccessToken(user);
+
+            // Create a refresh token
+            user.RefreshToken = GenerateRefreshToken(user);
             // Save the user to the database
             _context.Add(user);
             _context.SaveChanges();
 
             //create a token
-            user.Token = GenerateToken(user, 7);
-            // remove password before returning
-            user.Password = null;
+            user.Token = GenerateToken(user);
+            
             return user;
         }
 
@@ -202,7 +203,7 @@ namespace ExampleAPI.Services
             return user;
         }
 
-        public string GenerateAccessToken(UserModel user)
+        public string GenerateRefreshToken(UserModel user)
         {
             var token = new byte[32];
             using var rng = RandomNumberGenerator.Create();

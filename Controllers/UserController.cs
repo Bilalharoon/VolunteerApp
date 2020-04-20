@@ -44,27 +44,16 @@ namespace ExampleAPI.Controllers
                 return BadRequest("User is Invalid");
             }
 
-            //try
-            //{
-                var verifiedUser = _service.Login(user);
-                return Ok(verifiedUser);
-            //}
-            //catch (Exception e)
-            //{
-            //    return BadRequest(e.Message);
-            //}
-            
+           
+            var verifiedUser = _service.Login(user);
+            return Ok(verifiedUser);
+        
             
             
 
         }
 
-        //[Route("token")]
-        //[HttpPost]
-        //public IActionResult Token(UserModel user)
-        //{
-        //    _service.GenerateAccessToken(user);
-        //}
+
         [Route("Register")]
         [HttpPost]
         public IActionResult Register(UserModel user)
@@ -75,17 +64,14 @@ namespace ExampleAPI.Controllers
             }
 
             
-            UserModel response = _service.Register(user);
-            if (response == null)
-            {
-                return BadRequest("Username is already taken");
-            }
-            return Ok(response);
+            var userResponse = _service.Register(user);
+            
+            return Ok(userResponse);
 
         }
 
 
-
+        // TODO: change to post on /Event
         [Route("SignUpForEvent/{id}")]
         [Authorize(Roles = "Volunteer", AuthenticationSchemes = "OAuth")]
         [HttpGet]

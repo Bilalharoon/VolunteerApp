@@ -38,7 +38,7 @@ namespace ExampleAPI.Controllers
         }
 
         // GET: Event/5
-        [HttpGet("{id}", Name = "Get")]
+        [HttpGet("{id}")]
         public ActionResult<EventModel> Get(int id)
         {
             EventModel e = _service.GetEvent(id);

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using ExampleAPI.Helpers;
 using ExampleAPI.Models;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace ExampleAPI
 {
@@ -35,9 +37,10 @@ namespace ExampleAPI
                 ).AddNewtonsoftJson(
                 options =>
                 { 
-                    
+                    // Ignore loops
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                    //options.SerializerSettings.ContractResolver = new UserContractResolver();
+
+                    // add the converter to make the passwords null
                     options.SerializerSettings.Converters.Add(new UserConverter());
                 }
                 );
@@ -115,7 +118,7 @@ namespace ExampleAPI
         public override bool CanConvert(Type objectType)
         {
             // we can only convert users and lists of users
-            return objectType == typeof(UserModel)|| objectType == typeof(List<UserModel>);
+            return typeof(UserModel).IsAssignableFrom(objectType) || objectType == typeof(List<UserModel>);
         }
 
         // cannot deserialize json
@@ -123,34 +126,39 @@ namespace ExampleAPI
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            if (value is UserModel user)
+            switch (value)
             {
-
-                user.Password = null;
-
-                serializer.Serialize(writer, user);
-            }
-
-            if (value is List<UserModel> users)
-            {
-
-                
-                // start writing array
-                writer.WriteStartArray();
-
-                foreach(var u in users)
+                case UserModel user:
                 {
-                    u.Password = null;   // set password to null
-                    serializer.Serialize(writer, u); //serialize into json
+                    // Create a Json token from the object
+                    var t = JToken.FromObject(user);
+
+
+                    // Convert the Json token to a Json object
+                        var o = (JObject)t;
+
+                    // remove the password property
+                    o.Remove("Password");
+
+                    // write
+                    o.WriteTo(writer);
+                    break;
                 }
+                case List<UserModel> users:
+                {
+                    // start writing array
+                    writer.WriteStartArray();
 
-                writer.WriteEndArray();
+                    foreach(var u in users)
+                    {
+                        u.Password = null;   // set password to null
+                        serializer.Serialize(writer, u); //serialize into json
+                    }
 
-                
+                    writer.WriteEndArray();
+                    break;
+                }
             }
-            
-            
-            
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)

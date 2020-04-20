@@ -29,14 +29,14 @@ namespace ExampleAPI.Models
         /// <summary>
         /// The long-term token that is used to refresh other tokens 
         /// </summary>
-        public string AccessToken { get; set; }
+        public string RefreshToken { get; set; }
 
 
         [NotMapped]
         public string Token { get; set; }
 
         [JsonIgnore]
-        public virtual List<UserEvent> UserEvents { get; set; }
+        public virtual List<UserEvent> UserEvents { get; set; } = new List<UserEvent>();
 
         [NotMapped]
         public List<EventModel> Events => UserEvents.Select(userEvent => userEvent.Events).ToList();
